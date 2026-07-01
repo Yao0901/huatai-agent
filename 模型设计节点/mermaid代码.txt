@@ -1,0 +1,70 @@
+graph TD
+    %% ================= 第一个大框：意图识别 Agent =================
+    subgraph Agent1 [意图识别 Agent]
+        Start((1. Start)) --> Input[2. 自然语言输入]
+        Input --> CheckAmbiguity{3. 是否有模糊口径<br>和模糊目标?}
+        
+        CheckAmbiguity -- 是 --> SearchDB[寻找业务口径数据库]
+        SearchDB --> CheckFound{是否找到?}
+        CheckFound -- 找不到 --> AskUser1[追问用户]
+        AskUser1 -.-> Input
+        CheckFound -- 找到 --> Node4
+    end
+
+    %% ================= 第二个大框：查询 Agent =================
+    subgraph Agent2 [查询 Agent]
+        CheckAmbiguity -- 否 --> Node4[4. 检索表和列结构]
+        
+        Node4 --> CheckFit{5. 与用户要求<br>贴合不贴合?}
+        
+        CheckFit -- 有歧义 --> AskUser2[根据表结构追问用户]
+        AskUser2 -.-> Input
+        
+        CheckFit -- 贴合 --> GenSQL[6. 生成 SQL 语句]
+    end
+
+    %% ================= 第三个大框：安全评估 Agent =================
+    subgraph Agent3 [安全评估 Agent]
+        GenSQL --> CheckDanger{7. 评估是否有<br>危险和禁止操作?}
+        
+        %% 危险与禁止操作分支
+        CheckDanger -- 禁止操作<br>如DROP等 --> EndFail((退出流程<br>告知用户))
+        CheckDanger -- 危险操作<br>如UPDATE等 --> AskUser3[询问用户确认]
+        AskUser3 -- 用户拒绝 --> EndFail
+        AskUser3 -- 用户确认 --> CheckAuth
+        
+        %% 安全操作直接进入权限校验
+        CheckDanger -- 安全/无风险 --> CheckAuth
+        
+        %% 【新增】数据权限校验分支
+        CheckAuth{7.1 数据权限校验<br>是否越权?} -- 越权且无法过滤 --> EndAuthFail((退出流程<br>提示无数据权限))
+        CheckAuth -- 需行/列级过滤 --> InjectFilter[自动注入<br>权限过滤条件<br>如 WHERE dept='销售部']
+        InjectFilter --> ExecSQL
+        CheckAuth -- 权限充足 --> ExecSQL
+        
+        %% 执行与【新增】重试限制分支
+        ExecSQL[8. 执行 SQL 语句] --> CheckError{是否报错?}
+        
+        CheckError -- 未报错 --> Output[输出结果]
+        Output --> End((9. End))
+        
+        CheckError -- 报错 --> CheckRetry{重试次数 < 3?}
+        CheckRetry -- 否 (达到上限) --> EndMaxRetry((退出流程<br>告知超出重试限制))
+        CheckRetry -- 是 (继续重试) --> Reflect[反思错误原因]
+        Reflect -. 回到节点4 .-> Node4
+    end
+
+    %% ================= 样式美化 =================
+    classDef startEnd fill:#f9f2f4,stroke:#c7254e,stroke-width:2px;
+    classDef process fill:#e1f5fe,stroke:#01579b,stroke-width:1px;
+    classDef decision fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+    classDef agentBox fill:#f5f5f5,stroke:#9e9e9e,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef newFeature fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px; %% 新增特性高亮
+
+    class Start,End,EndFail,EndAuthFail,EndMaxRetry startEnd;
+    class Input,SearchDB,Node4,GenSQL,ExecSQL,Reflect,Output,AskUser1,AskUser2,AskUser3,InjectFilter process;
+    class CheckAmbiguity,CheckFound,CheckFit,CheckDanger,CheckAuth,CheckError,CheckRetry decision;
+    class Agent1,Agent2,Agent3 agentBox;
+    
+    %% 高亮新增的节点
+    class CheckRetry,EndMaxRetry,CheckAuth,InjectFilter,EndAuthFail newFeature;

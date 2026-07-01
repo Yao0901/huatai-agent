@@ -1,0 +1,66 @@
+[
+    {
+        "metric_name": "客户总资产",
+        "aliases": ["总资产", "资产规模", "资产", "总资产规模"],
+        "formula": "COALESCE(nm_tot_aset, 0) + COALESCE(fc_pur_aset, 0)",
+        "involved_tables": ["dws_cust_aset_d"],
+        "description": "普通账户总资产 + 富裕账户总资产",
+        "example_question": "查询钻石卡男性客户的总资产"
+    },
+    {
+        "metric_name": "客户持仓市值",
+        "aliases": ["持仓市值", "持仓", "持股", "持有市值", "仓位"],
+        "formula": "SUM(mkt_val)",
+        "involved_tables": ["dwd_cust_hold_d"],
+        "description": "客户持有的所有产品市值之和，按客户聚合",
+        "example_question": "30岁以下女性客户的持仓市值排行"
+    },
+    {
+        "metric_name": "客户交易量",
+        "aliases": ["交易量", "成交量", "买卖金额", "交易金额", "成交额"],
+        "formula": "SUM(COALESCE(buy_amt, 0) + COALESCE(sell_amt, 0))",
+        "involved_tables": ["dwd_cust_tran_d"],
+        "description": "客户买入金额 + 卖出金额合计",
+        "example_question": "26年Q1日均资产大于30万客户中，股票交易量大于10万的"
+    },
+    {
+        "metric_name": "客户盈亏",
+        "aliases": ["盈亏", "收益", "利润", "赚了", "盈亏情况", "投资回报"],
+        "formula": "(期末总资产 - 期初总资产) + 流出 - 流入",
+        "involved_tables": ["dws_cust_aset_d", "dws_cust_fin_d"],
+        "description": "客户在指定时间段内的投资盈亏，需结合 dws_cust_aset_d（期初期末资产）和 dws_cust_fin_d（期间资金进出）计算",
+        "example_question": "钻石卡男性客户，年龄大于40岁，持有比亚迪市值超过1000元，26年Q1盈亏"
+    },
+    {
+        "metric_name": "客户资金净流入",
+        "aliases": ["资金流入", "入金", "净流入", "资金净流入", "资金进出"],
+        "formula": "SUM(COALESCE(cash_in,0)+COALESCE(tran_in,0)+COALESCE(assign_in,0)) - SUM(COALESCE(cash_out,0)+COALESCE(tran_out,0)+COALESCE(assign_out,0))",
+        "involved_tables": ["dws_cust_fin_d"],
+        "description": "现金+证券+指定的转入合计减去转出合计",
+        "example_question": "查询26年Q1客户资金净流入情况"
+    },
+    {
+        "metric_name": "日均资产",
+        "aliases": ["日均资产", "日均", "平均资产", "日均总资产"],
+        "formula": "SUM(COALESCE(nm_tot_aset,0)+COALESCE(fc_pur_aset,0)) / 天数",
+        "involved_tables": ["dws_cust_aset_d"],
+        "description": "时间段内每日总资产之和除以天数",
+        "example_question": "26年Q1日均资产大于30万的客户"
+    },
+    {
+        "metric_name": "客户数量",
+        "aliases": ["客户数", "人数", "数量", "客户数量", "多少个", "有多少"],
+        "formula": "COUNT(DISTINCT pty_id)",
+        "involved_tables": ["ads_cust_info_d"],
+        "description": "去重客户计数",
+        "example_question": "学历本科及以上的男性客户，年龄大于50岁的有多少个"
+    },
+    {
+        "metric_name": "客户年龄分布",
+        "aliases": ["年龄分布", "年龄段", "不同年龄段", "各年龄段"],
+        "formula": "CASE WHEN cust_age<30 THEN '<30' WHEN cust_age>=30 AND cust_age<50 THEN '[30,50)' WHEN cust_age>=50 AND cust_age<60 THEN '[50,60)' WHEN cust_age>=60 THEN '[60,)' END",
+        "involved_tables": ["ads_cust_info_d"],
+        "description": "客户按年龄段分组，常用分段：<30 / 30-50 / 50-60 / 60+",
+        "example_question": "不同客户年龄段资产分布情况"
+    }
+]

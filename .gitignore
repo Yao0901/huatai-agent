@@ -1,0 +1,27 @@
+# 数据库文件（69MB，从 CSV 自动构建）
+model/huatai.db
+
+# 本地模型文件（391MB，由 rebuild_vectors.py 下载）
+data/业务词汇匹配文件夹/model/
+
+# API Key
+.env
+
+# 原始 CSV 数据（赛题数据，不需要版本管理）
+01-金融大模型与智能体赛道-华泰证券-Agentic智能问数在客户营销场景的应用/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code 记忆（非项目代码）
+.claude/
