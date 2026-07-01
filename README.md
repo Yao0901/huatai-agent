@@ -29,8 +29,8 @@ cp .env.example .env
 LLM_API_KEY=sk-你的key
 
 # DeepSeek
-# (LLM_BASE_URL=https://api.deepseek.com)
-# (MODEL_ID=deepseek-v4-pro)
+# LLM_BASE_URL=https://api.deepseek.com
+# MODEL_ID=deepseek-v4-pro
 
 # MiniMax
 # LLM_BASE_URL=https://api.minimaxi.com/v1
