@@ -1,9 +1,6 @@
 # 数据库文件（69MB，从 CSV 自动构建）
 model/huatai.db
 
-# 本地模型文件（391MB，由 rebuild_vectors.py 下载）
-data/业务词汇匹配文件夹/model/
-
 # API Key
 .env
 
