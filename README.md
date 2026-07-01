@@ -10,52 +10,27 @@
 
 将赛方提供的 CSV 数据文件夹复制到 `data/` 下，启动时 `main.py` 会自动读取 CSV 建库。
 
-### 2. 安装依赖
+### 2. 进入 model 目录
+
+```bash
+cd model
+```
+
+### 3. 安装依赖
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. 配置 LLM API 复制在终端运行
+### 4. 配置 LLM API
 
 ```bash
-cd model
 cp .env.example .env
 ```
 
-编辑 `.env`，根据你使用的api填入对应密钥 `LLM_API_KEY`，然后取消注释你要用的厂商两行：
+编辑 `.env`，填入你的 API Key 并取消注释对应厂商的配置行。
 
-```env
-LLM_API_KEY=sk-你的key
-
-# DeepSeek
-# LLM_BASE_URL=https://api.deepseek.com
-# MODEL_ID=deepseek-v4-pro
-
-# MiniMax
-# LLM_BASE_URL=https://api.minimaxi.com/v1
-# MODEL_ID=MiniMax-M2.5
-
-# 智谱 GLM
-# LLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
-# MODEL_ID=glm-4-plus
-
-# Kimi
-# LLM_BASE_URL=https://api.moonshot.cn/v1
-# MODEL_ID=moonshot-v1-8k
-
-# 通义千问
-# LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
-# MODEL_ID=qwen-plus
-
-# 豆包 (火山引擎)
-# LLM_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
-# MODEL_ID=doubao-pro-32k
-```
-
-
-
-### 4. 启动
+### 5. 启动
 
 ```bash
 python main.py
@@ -99,8 +74,6 @@ huatai-agent/
 │       └── metric_definitions.json  # 8 条业务口径定义（名称、别名、描述、涉及表）
 └── 01-金融大模型与智能体赛道-.../   # 原始 CSV 数据
 ```
-
-
 
 ## 示例
 
