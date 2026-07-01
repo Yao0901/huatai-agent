@@ -1,8 +1,8 @@
 """
 LLM 配置模块
 
-负责从 .env 文件加载 DeepSeek API 配置，提供统一的 LLM 调用接口。
-使用 OpenAI 兼容 SDK（openai 包），base_url 指向 DeepSeek。
+负责从 .env 文件加载 LLM API 配置，提供统一的 LLM 调用接口。
+使用 OpenAI 兼容 SDK（openai 包），base_url 指向配置的 LLM 服务。
 """
 
 import json
@@ -37,7 +37,8 @@ def get_llm_config() -> dict:
     """
     获取 LLM 配置字典。
 
-    从环境变量读取 DeepSeek 配置，可用于初始化 ChatOpenAI 客户端。
+    从环境变量读取 LLM 配置（LLM_API_KEY / LLM_BASE_URL / MODEL_ID），
+    兼容旧版 DEEPSEEK_* 变量名，可用于初始化 ChatOpenAI 客户端。
 
     Returns:
         dict: {"api_key": str, "base_url": str, "model": str}
@@ -45,17 +46,16 @@ def get_llm_config() -> dict:
     Raises:
         ValueError: API Key 未设置时抛出
     """
-    api_key = os.environ.get("DEEPSEEK_API_KEY", "")
+    api_key = os.environ.get("LLM_API_KEY") or os.environ.get("DEEPSEEK_API_KEY", "")
     if not api_key or api_key == "your_api_key_here":
         raise ValueError(
-            "DeepSeek API Key 未设置。请在 model/.env 文件中填入你的 API Key。\n"
-            "获取地址: https://platform.deepseek.com/api_keys"
+            "LLM_API_KEY 未设置。请在 model/.env 文件中填入你的 API Key。"
         )
 
     return {
         "api_key": api_key,
-        "base_url": os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
-        "model": os.environ.get("DEEPSEEK_MODEL", "deepseek-chat"),
+        "base_url": os.environ.get("LLM_BASE_URL") or os.environ.get("DEEPSEEK_BASE_URL", ""),
+        "model": os.environ.get("MODEL_ID") or os.environ.get("DEEPSEEK_MODEL", ""),
     }
 
 
@@ -88,7 +88,7 @@ def chat(
     max_tokens: int = 2048,
 ) -> str:
     """
-    向 DeepSeek 发送一次对话请求，返回模型的文本回复。
+    向 LLM 发送一次对话请求，返回模型的文本回复。
 
     这是整个项目中 LLM 调用的统一入口。所有节点（ambiguity_node、
     sql_gen_node、reflect_node 等）都通过此函数调用 LLM。
@@ -131,7 +131,7 @@ def chat_with_tools(
     max_tool_rounds: int = 5,
 ) -> str:
     """
-    向 DeepSeek 发送支持 tool calling 的对话请求。
+    向 LLM 发送支持 tool calling 的对话请求。
 
     LLM 可以多次调用 tool，每次调用结果会追加到对话中，
     直到 LLM 不再请求 tool 或达到最大轮次。
@@ -242,7 +242,7 @@ class _TokenCounter(BaseCallbackHandler):
 
 def get_chat_model(temperature: float = 0.0):
     """
-    返回适配 DeepSeek 的 LangChain ChatOpenAI 实例。
+    返回适配 LLM 服务的 LangChain ChatOpenAI 实例。
 
     供 langgraph.prebuilt.create_react_agent 的 model 参数使用。
     """

@@ -29,24 +29,25 @@ def _resolve_paths() -> tuple:
 _MODEL_DIR, _PROJECT_DIR = _resolve_paths()
 DB_PATH = os.path.join(_MODEL_DIR, "huatai.db")
 
-# CSV 数据源目录
-CSV_DIR = os.path.join(
-    _PROJECT_DIR,
-    "data",
-    "01-金融大模型与智能体赛道-华泰证券-Agentic智能问数在客户营销场景的应用",
-)
+# CSV 数据源目录 — 递归扫描 data/ 下所有 CSV 文件
+def _extract_table_name(filename: str) -> str:
+    """从文件名提取表名，自动识别末尾时间戳。"""
+    base = filename.replace(".csv", "")
+    parts = base.rsplit("_", 1)
+    if len(parts) == 2 and parts[1].isdigit():
+        return parts[0]
+    return base
 
-# CSV 文件名 → 数据库表名 映射
-CSV_TO_TABLE = {
-    "ads_cust_info_d_202606031625.csv":  "ads_cust_info_d",
-    "dim_product_202606021049.csv":       "dim_product",
-    "dwd_cust_hold_d_202606021051.csv":   "dwd_cust_hold_d",
-    "dwd_cust_tran_d_202606021051.csv":   "dwd_cust_tran_d",
-    "dws_cust_aset_d_202606021051.csv":   "dws_cust_aset_d",
-    "dws_cust_fin_d_202606021050.csv":    "dws_cust_fin_d",
-    "dim_public_202606021050.csv":        "dim_public",
-    "dim_branch_202606021048.csv":        "dim_branch",
-}
+
+def _build_csv_map() -> dict:
+    """递归扫描 data/ 下所有 CSV，返回 {完整路径: 表名} 映射。"""
+    import glob
+    data_root = os.path.join(_PROJECT_DIR, "data")
+    mapping = {}
+    for f in glob.glob(os.path.join(data_root, "**", "*.csv"), recursive=True):
+        table = _extract_table_name(os.path.basename(f))
+        mapping[f] = table
+    return mapping
 
 # 全局连接实例（单例模式，避免重复建库）
 _connection: Optional[sqlite3.Connection] = None
@@ -81,12 +82,7 @@ def _init_database(force_reload: bool = False) -> sqlite3.Connection:
     _connection = sqlite3.connect(DB_PATH, check_same_thread=False)
     _connection.row_factory = sqlite3.Row  # 让查询结果可以用列名访问
 
-    for csv_filename, table_name in CSV_TO_TABLE.items():
-        csv_path = os.path.join(CSV_DIR, csv_filename)
-        if not os.path.exists(csv_path):
-            print(f"[WARN] CSV 文件不存在: {csv_path}")
-            continue
-
+    for csv_path, table_name in _build_csv_map().items():
         # 第1步：读取 CSV 表头推断列类型
         with open(csv_path, "r", encoding="utf-8") as f:
             reader = csv.reader(f)
@@ -116,7 +112,7 @@ def _init_database(force_reload: bool = False) -> sqlite3.Connection:
                 _connection.executemany(insert_sql, reader)
 
             _connection.commit()
-            print(f"[DB] 导入 {table_name}: {csv_filename}")
+            print(f"[DB] 导入 {table_name}: {os.path.basename(csv_path)}")
 
     return _connection
 

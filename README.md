@@ -1,8 +1,67 @@
 # huatai-agent
 
-智谋洞见 — 基于 LangGraph ReAct + DeepSeek V4 的智能问数 Agent。
+智谋洞见 — 基于 LangGraph ReAct的智能问数 Agent。
 
 用户输入自然语言 → Agent 自主探索数据库结构 → 生成 SQL → 执行验证 → 自我修正 → 输出答案。
+
+## 使用说明
+
+### 1. 准备数据
+
+将赛方提供的 CSV 数据文件夹复制到 `data/` 下，启动时 `main.py` 会自动读取 CSV 建库。
+
+### 2. 安装依赖
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. 配置 LLM API 复制在终端运行
+
+```bash
+cd model
+cp .env.example .env
+```
+
+编辑 `.env`，根据你使用的api填入对应密钥 `LLM_API_KEY`，然后取消注释你要用的厂商两行：
+
+```env
+LLM_API_KEY=sk-你的key
+
+# DeepSeek
+# (LLM_BASE_URL=https://api.deepseek.com)
+# (MODEL_ID=deepseek-v4-pro)
+
+# MiniMax
+# LLM_BASE_URL=https://api.minimaxi.com/v1
+# MODEL_ID=MiniMax-M2.5
+
+# 智谱 GLM
+# LLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+# MODEL_ID=glm-4-plus
+
+# Kimi
+# LLM_BASE_URL=https://api.moonshot.cn/v1
+# MODEL_ID=moonshot-v1-8k
+
+# 通义千问
+# LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+# MODEL_ID=qwen-plus
+
+# 豆包 (火山引擎)
+# LLM_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
+# MODEL_ID=doubao-pro-32k
+```
+
+
+
+### 3. 启动
+
+```bash
+python main.py
+```
+
+交互式对话，输入 SQL 问数需求，输入 `exit` 退出。
 
 ## 架构
 
@@ -26,13 +85,14 @@ ReAct Agent（单一 LLM 循环）
 huatai-agent/
 ├── README.md
 ├── model/
+│   ├── requirements.txt         # Python 依赖
 │   ├── main.py                  # 入口（交互模式，支持多行输入）
 │   ├── huatai.db                # SQLite 数据库（启动时从 CSV 自动构建）
 │   ├── agents/
 │   │   └── react_agent.py       # ReAct Agent：4 个工具 + System Prompt + 上下文管理
 │   └── tools/
 │       ├── db_connector.py      # SQLite 连接管理 + SQL 执行
-│       ├── llm_config.py        # DeepSeek API（OpenAI 兼容 SDK + Token 计数 + ChatOpenAI 适配）
+│       ├── llm_config.py        # LLM 配置（OpenAI 兼容协议，支持多厂商切换）
 │       └── metric_retriever.py  # 口径定义匹配 + dim_public 码值查询
 ├── data/
 │   └── 业务词汇匹配文件夹/
@@ -44,14 +104,8 @@ huatai-agent/
 
 ```bash
 cd model
-
-# 安装依赖
-pip install langgraph langchain-openai sqlglot openai
-
-# 配置 DeepSeek API Key（编辑 .env 文件，默认 deepseek-chat）
-echo "DEEPSEEK_API_KEY=sk-xxx" > .env
-
-# 交互模式
+cp .env.example .env      # 编辑 .env 填入 LLM_API_KEY
+pip install -r requirements.txt
 python main.py
 ```
 
@@ -97,5 +151,5 @@ python main.py
 ## 当前已知缺口
 
 1. **追问深度不足**: Agent 偶尔会自己猜而不是调用 `ask_user` 追问
-2. **DeepSeek 编码相关**: `search_code_mapping` 查 dim_public 结果依赖 LIKE 模糊匹配
+2. **缺乏记忆读写**: 暂时未做记忆读写功能
 3. **缺少评测集**: 目标 >90% 准确率，尚无标准测试集
