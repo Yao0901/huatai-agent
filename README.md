@@ -100,14 +100,7 @@ huatai-agent/
 └── 01-金融大模型与智能体赛道-.../   # 原始 CSV 数据
 ```
 
-## 快速开始
 
-```bash
-cd model
-cp .env.example .env      # 编辑 .env 填入 LLM_API_KEY
-pip install -r requirements.txt
-python main.py
-```
 
 ## 示例
 
