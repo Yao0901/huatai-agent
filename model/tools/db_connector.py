@@ -32,6 +32,7 @@ DB_PATH = os.path.join(_MODEL_DIR, "huatai.db")
 # CSV 数据源目录
 CSV_DIR = os.path.join(
     _PROJECT_DIR,
+    "data",
     "01-金融大模型与智能体赛道-华泰证券-Agentic智能问数在客户营销场景的应用",
 )
 
@@ -77,7 +78,7 @@ def _init_database(force_reload: bool = False) -> sqlite3.Connection:
     if force_reload and os.path.exists(DB_PATH):
         os.remove(DB_PATH)
 
-    _connection = sqlite3.connect(DB_PATH)
+    _connection = sqlite3.connect(DB_PATH, check_same_thread=False)
     _connection.row_factory = sqlite3.Row  # 让查询结果可以用列名访问
 
     for csv_filename, table_name in CSV_TO_TABLE.items():
