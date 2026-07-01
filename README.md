@@ -16,7 +16,7 @@
 pip install -r requirements.txt
 ```
 
-### 2. 配置 LLM API 复制在终端运行
+### 3. 配置 LLM API 复制在终端运行
 
 ```bash
 cd model
@@ -55,7 +55,7 @@ LLM_API_KEY=sk-你的key
 
 
 
-### 3. 启动
+### 4. 启动
 
 ```bash
 python main.py
