@@ -13,7 +13,7 @@
 ### 2. 进入 model 目录
 
 ```bash
-cd model
+cd model1.2
 ```
 
 ### 3. 安装依赖
